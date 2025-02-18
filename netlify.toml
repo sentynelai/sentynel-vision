@@ -1,0 +1,39 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+  
+[build.environment]
+  NODE_VERSION = "20"
+  MUX_ACCESS_TOKEN_ID = "placeholder"
+  MUX_SECRET_KEY = "placeholder"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@mux/mux-node"]
+
+# Function routes must come first
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# Then SPA routes
+[[redirects]]
+  from = "/c/*"
+  to = "/index.html"
+  status = 200!
+  force = true
+
+[[redirects]]
+  from = "/connect/*"
+  to = "/index.html"
+  status = 200!
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true

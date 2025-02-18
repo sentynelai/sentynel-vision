@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Spots collection
+    match /spots/{spotId} {
+      // Allow read access for camera connections and authenticated users
+      allow read: if true;
+      
+      // Allow create if user is authenticated
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Allow update if user owns the spot or it's a camera status update
+      allow update: if isOwner(resource.data.userId) || 
+        // Allow camera status updates via connection token
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['videoFeeds']));
+      
+      // Allow delete if user owns the spot
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // Video chunks collection
+    match /video_chunks/{chunkId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if isAuthenticated();
+    }
+
+    // Analysis results collection
+    match /analysis_results/{resultId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Reports collection
+    match /reports/{reportId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

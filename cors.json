@@ -1,0 +1,52 @@
+[
+  {
+    "origin": [
+      "https://sentynel.vision",
+      "https://sentynel-vision.netlify.app",
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://*.netlify.app",
+      "https://*.sentynel.cloud",
+      "https://*.sentynel.vision",
+      "https://*.webcontainer.io",
+      "https://*.local-credentialless.webcontainer-api.io",
+      "https://vision-sentynel.firebaseapp.com",
+      "https://vision-sentynel.web.app",
+      "https://*.stackblitz.io"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "HEAD",
+      "OPTIONS"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Content-Range",
+      "Content-Encoding",
+      "Content-Language",
+      "Cache-Control",
+      "Expires",
+      "Last-Modified",
+      "ETag",
+      "x-goog-meta-*",
+      "x-goog-storage-class",
+      "x-goog-hash",
+      "x-goog-generation",
+      "x-goog-metageneration",
+      "Authorization",
+      "Origin",
+      "Accept",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Expose-Headers",
+      "Access-Control-Allow-Credentials"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

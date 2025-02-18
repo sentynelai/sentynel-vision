@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-neon-green: #39FF14;
+  --color-neon-blue: #00F3FF;
+  --color-neon-pink: #FF10F0;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-inter);
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  @apply bg-black text-white;
+}
+
+/* Form styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="time"],
+textarea,
+select {
+  @apply bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-neon-green focus:ring-neon-green;
+}
+
+input[type="range"] {
+  @apply accent-neon-green;
+}
+
+input[type="checkbox"] {
+  @apply rounded border-gray-700 text-neon-green focus:ring-neon-green bg-gray-800;
+}
+
+/* Custom utilities */
+.text-shadow-neon {
+  text-shadow: 0 0 10px var(--color-neon-green),
+               0 0 20px var(--color-neon-green),
+               0 0 30px var(--color-neon-green);
+}
+
+.border-neon {
+  box-shadow: 0 0 5px var(--color-neon-green),
+              0 0 10px var(--color-neon-green),
+              0 0 15px var(--color-neon-green);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse animation for status indicators */
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-status-pulse {
+  animation: status-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50;
+}
+
+/* Card styles */
+.card {
+  @apply bg-gray-900 rounded-xl border border-neon-green/20 shadow-lg;
+}
+
+/* Button styles */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg transition-colors duration-200;
+}
+
+.btn-primary {
+  @apply text-black bg-neon-green hover:bg-neon-green/90;
+}
+
+.btn-outline {
+  @apply text-white bg-transparent border border-neon-green/50 hover:bg-neon-green/10;
+}

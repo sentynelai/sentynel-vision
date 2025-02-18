@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow read/write access to recordings folder for camera feeds
+    match /recordings/{spotId}/{feedId}/{fileName} {
+      allow read, write: if true;  // Public access for camera feeds
+    }
+    
+    // Allow read/write access to processed videos
+    match /processed/{spotId}/{feedId}/{fileName} {
+      allow read: if true;  // Public read access for processed videos
+      allow write: if request.auth != null;  // Only authenticated users can write
+    }
+    
+    // Allow read/write access to frames for analysis
+    match /frames/{spotId}/{feedId}/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Default rule - deny all other access
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
