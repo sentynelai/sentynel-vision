@@ -2,10 +2,12 @@ import { Handler } from '@netlify/functions';
 import Mux from '@mux/mux-node';
 
 // Initialize Mux client
-const { Video } = new Mux({
+const mux = new Mux({
   tokenId: process.env.MUX_ACCESS_TOKEN_ID!,
   tokenSecret: process.env.MUX_SECRET_KEY!
 });
+
+const Video = mux.video;
 
 export const handler: Handler = async (event, context) => {
   // Enable CORS
@@ -31,7 +33,7 @@ export const handler: Handler = async (event, context) => {
     if (event.httpMethod === 'POST' && !pathParts.length) {
       const { spotId, feedId } = JSON.parse(event.body || '{}');
       
-      const response = await Video.LiveStreams.create({
+      const response = await Video.liveStreams.create({
         playback_policy: 'public',
         new_asset_settings: {
           playback_policy: 'public'
@@ -54,7 +56,7 @@ export const handler: Handler = async (event, context) => {
     // Get stream status
     if (event.httpMethod === 'GET' && pathParts[0] && pathParts[1] === 'status') {
       const streamId = pathParts[0];
-      const stream = await Video.LiveStreams.get(streamId);
+      const stream = await Video.liveStreams.get(streamId);
       
       return {
         statusCode: 200,
@@ -69,7 +71,7 @@ export const handler: Handler = async (event, context) => {
     // Stop stream
     if (event.httpMethod === 'POST' && pathParts[0] && pathParts[1] === 'stop') {
       const streamId = pathParts[0];
-      await Video.LiveStreams.disable(streamId);
+      await Video.liveStreams.disable(streamId);
       
       return {
         statusCode: 200,
@@ -81,7 +83,7 @@ export const handler: Handler = async (event, context) => {
     // Delete stream
     if (event.httpMethod === 'DELETE' && pathParts[0]) {
       const streamId = pathParts[0];
-      await Video.LiveStreams.delete(streamId);
+      await Video.liveStreams.delete(streamId);
       
       return {
         statusCode: 200,
