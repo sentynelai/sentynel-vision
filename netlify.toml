@@ -23,13 +23,13 @@
 [[redirects]]
   from = "/c/*"
   to = "/index.html"
-  status = 200!
+  status = 200
   force = true
 
 [[redirects]]
   from = "/connect/*"
   to = "/index.html"
-  status = 200!
+  status = 200
   force = true
 
 [[redirects]]
