@@ -17,7 +17,7 @@ export class MuxService {
     playbackId: string;
   }> {
     try {
-      const response = await fetch(`${API_URL}/live-streams`, {
+      const response = await fetch(`${API_URL}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
