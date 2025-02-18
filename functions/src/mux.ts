@@ -7,6 +7,8 @@ const mux = new Mux({
   tokenSecret: process.env.MUX_SECRET_KEY
 });
 
+console.log(mux);
+
 const { Video } = mux.Video;
 
 export const createLiveStream = functions.https.onCall(async (data, context) => {
