@@ -35,6 +35,7 @@ const spots = ref<any[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const stream = ref<MediaStream | null>(null);
+const streamId = ref<string>('');
 const streamKey = ref<string>('');
 const playbackId = ref<string>('');
 const videoContainer = ref<HTMLDivElement | null>(null);
@@ -125,11 +126,10 @@ const startCamera = async () => {
 
     // Create Mux live stream
     connectionSteps.value[1].status = 'loading';
-    const { streamKey: newStreamKey, playbackId: newPlaybackId } = await MuxService.createLiveStream(
-      spot.value?.id || '',
-      feed.value?.id || ''
-    );
+    const { streamId: newStreamId, streamKey: newStreamKey, playbackId: newPlaybackId } = 
+      await MuxService.createLiveStream(spot.value?.id || '', feed.value?.id || '');
 
+    streamId.value = newStreamId;
     streamKey.value = newStreamKey;
     playbackId.value = newPlaybackId;
 
@@ -186,9 +186,9 @@ const startCamera = async () => {
 
 const startUploadMonitoring = () => {
   const updateProgress = async () => {
-    if (streamKey.value) {
+    if (streamId.value) {
       try {
-        const status = await MuxService.getLiveStreamStatus(streamKey.value);
+        const status = await MuxService.getLiveStreamStatus(streamId.value);
         if (status.status === 'active') {
           uploadProgress.value = 100;
           uploadStatus.value = 'uploading';
