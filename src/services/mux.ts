@@ -41,7 +41,7 @@ export class MuxService {
     playbackId: string;
   }> {
     try {
-      const response = await fetch(`${API_URL}/live-streams/${streamId}/status`);
+      const response = await fetch(`${API_URL}/${streamId}/status`);
       
       if (!response.ok) {
         throw new Error('Failed to get stream status');
@@ -56,7 +56,7 @@ export class MuxService {
 
   static async stopLiveStream(streamId: string): Promise<void> {
     try {
-      const response = await fetch(`${API_URL}/live-streams/${streamId}/stop`, {
+      const response = await fetch(`${API_URL}/${streamId}/stop`, {
         method: 'POST'
       });
 
@@ -71,7 +71,7 @@ export class MuxService {
 
   static async deleteLiveStream(streamId: string): Promise<void> {
     try {
-      const response = await fetch(`${API_URL}/live-streams/${streamId}`, {
+      const response = await fetch(`${API_URL}/${streamId}`, {
         method: 'DELETE'
       });
 
