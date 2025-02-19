@@ -32,7 +32,9 @@ export const handler: Handler = async (event, context) => {
     // Create live stream
     if (event.httpMethod === 'POST' && !pathParts.length) {
       const { spotId, feedId } = JSON.parse(event.body || '{}');
-      
+
+      console.log(Object.keys(Video.liveStreams));
+
       const response = await Video.liveStreams.create({
         playback_policy: 'public',
         new_asset_settings: {
@@ -56,7 +58,10 @@ export const handler: Handler = async (event, context) => {
     // Get stream status
     if (event.httpMethod === 'GET' && pathParts[0] && pathParts[1] === 'status') {
       const streamId = pathParts[0];
-      const stream = await Video.liveStreams.get(streamId);
+
+      console.log(Object.keys(Video));
+
+      const stream = await Video.liveStreams.retrieve(streamId);
       
       return {
         statusCode: 200,
