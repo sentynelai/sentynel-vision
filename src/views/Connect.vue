@@ -145,11 +145,25 @@ const startCamera = async () => {
       await spotStore.updateVideoFeed(spot.value.id, feed.value.id, {
         muxStreamId: streamId.value,
         muxPlaybackId: playbackId.value,
-        status: 'active',
-        rtmpUrl: rtmpUrl.value,  // Save RTMP URL
-        streamKey: streamKey.value  // Save stream key
+        status: 'active'
       });
+
+      // Start monitoring upload progress
+      startUploadMonitoring();
     }
+
+    // Show streaming instructions
+    const instructions = `
+To start streaming:
+1. Open your streaming software (like OBS)
+2. Add a new Stream
+3. Set Service to "Custom"
+4. Set Server to: ${rtmpUrl.value}
+5. Set Stream Key to: ${streamKey.value}
+6. Click "Start Streaming" in your software
+    `;
+    
+    alert(instructions);
 
     // Show success message with streaming info
     error.value = null;
@@ -522,6 +536,27 @@ onBeforeUnmount(() => {
             </div>
             <span class="text-xs text-gray-400">Good Connection</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Streaming Instructions -->
+      <div v-if="streamKey" class="fixed bottom-4 right-4 p-4 bg-black/80 backdrop-blur-sm rounded-xl border border-neon-green/20 max-w-md">
+        <h3 class="text-white font-medium mb-2">Streaming Instructions</h3>
+        <div class="space-y-2 text-sm">
+          <p class="text-gray-400">Configure your streaming software with:</p>
+          <div class="bg-black/50 p-2 rounded">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-gray-400">RTMP URL:</span>
+              <code class="text-neon-green">{{ rtmpUrl }}</code>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Stream Key:</span>
+              <code class="text-neon-green">{{ streamKey }}</code>
+            </div>
+          </div>
+          <p class="text-yellow-400 text-xs">
+            Start streaming in your software to activate the feed
+          </p>
         </div>
       </div>
     </div>
