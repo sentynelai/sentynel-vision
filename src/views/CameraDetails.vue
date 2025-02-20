@@ -306,7 +306,7 @@ const checkStreamStatus = async () => {
   
   try {
     const status = await MuxService.getLiveStreamStatus(feed.value.muxStreamId);
-    isStreamReady.value = status.status === 'active';
+    isStreamReady.value = status.status === 'active' || status.status === 'idle';
     
     if (!isStreamReady.value) {
       error.value = 'Waiting for stream to start...';
