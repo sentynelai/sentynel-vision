@@ -230,22 +230,23 @@ export const useSpotStore = defineStore('spots', () => {
     updates: Partial<VideoFeed>
   ) => {
     try {
-      const feedRef = doc(db, 'spots', spotId, 'videoFeeds', feedId);
-      await updateDoc(feedRef, {
-        ...updates,
+      const spot = spots.value.find(s => s.id === spotId);
+      if (!spot) throw new Error('Spot not found');
+  
+      const updatedFeeds = spot.videoFeeds.map(feed => 
+        feed.id === feedId ? { ...feed, ...updates } : feed
+      );
+  
+      const spotRef = doc(db, 'spots', spotId);
+      await updateDoc(spotRef, {
+        videoFeeds: updatedFeeds,
         updatedAt: serverTimestamp()
       });
       
       // Update local state
       const spotIndex = spots.value.findIndex(s => s.id === spotId);
       if (spotIndex !== -1) {
-        const feedIndex = spots.value[spotIndex].videoFeeds.findIndex(f => f.id === feedId);
-        if (feedIndex !== -1) {
-          spots.value[spotIndex].videoFeeds[feedIndex] = {
-            ...spots.value[spotIndex].videoFeeds[feedIndex],
-            ...updates
-          };
-        }
+        spots.value[spotIndex].videoFeeds = updatedFeeds;
       }
       
       return true;

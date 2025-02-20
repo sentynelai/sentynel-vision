@@ -9,6 +9,7 @@ import CameraStatusIndicator from '../components/CameraStatusIndicator.vue';
 import { VideoProcessingService } from '../services/videoProcessing';
 import { XMarkIcon, ArrowLeftIcon, VideoCameraIcon, PlayIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 import '@mux/mux-player';
+import { MuxService } from '../services/mux';
 
 const stats = {
   alerts: []
@@ -44,6 +45,9 @@ const hasStartedLoading = ref(false);
 const isVideoReady = ref(false);
 const playbackAttempts = ref(0);
 const MAX_PLAYBACK_ATTEMPTS = 3;
+
+const isStreamReady = ref(false);
+const streamCheckInterval = ref<number | null>(null);
 
 const preloadNextChunk = async () => {
   const nextIndex = (currentChunkIndex.value + 1) % videoChunks.value.length;
@@ -295,6 +299,24 @@ const stopVideoUpdate = () => {
   }
 };
 
+const checkStreamStatus = async () => {
+  if (!feed.value?.muxStreamId) return;
+  
+  try {
+    const status = await MuxService.getLiveStreamStatus(feed.value.muxStreamId);
+    isStreamReady.value = status.status === 'active';
+    
+    if (!isStreamReady.value) {
+      error.value = 'Waiting for stream to start...';
+    } else {
+      error.value = null;
+    }
+  } catch (err) {
+    console.error('Error checking stream status:', err);
+    error.value = 'Stream not available';
+  }
+};
+
 onMounted(async () => {
   await nextTick();
   try {
@@ -303,6 +325,10 @@ onMounted(async () => {
       error.value = 'Spot not found';
     } else if (!feed.value) {
       error.value = 'Camera not found';
+    } else {
+      // Start checking stream status
+      await checkStreamStatus();
+      streamCheckInterval.value = window.setInterval(checkStreamStatus, 5000);
     }
     isInitializing.value = false;
     // Start loading chunks when hasStartedLoading becomes true
@@ -364,6 +390,10 @@ onBeforeUnmount(() => {
   }
   isVideoReady.value = false;
   hasStartedLoading.value = false;
+
+  if (streamCheckInterval.value) {
+    clearInterval(streamCheckInterval.value);
+  }
 });
 
 const handleBack = () => {
@@ -445,7 +475,7 @@ const handleBack = () => {
       <div class="pt-16">
         <!-- Video Player -->
         <div class="aspect-video bg-gray-900 relative overflow-hidden">
-          <template v-if="feed?.muxPlaybackId">
+          <template v-if="feed?.muxPlaybackId && isStreamReady">
             <mux-player
               :playback-id="feed.muxPlaybackId"
               stream-type="live"
@@ -462,14 +492,14 @@ const handleBack = () => {
             ></mux-player>
           </template>
 
-          <!-- Loading State -->
+          <!-- Loading/Error State -->
           <div
-            v-if="loading || isInitializing"
+            v-if="loading || isInitializing || (!isStreamReady && feed?.status === 'active')"
             class="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           >
             <div class="text-center">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-green mx-auto mb-4"></div>
-              <p class="text-white">Connecting to live stream...</p>
+              <p class="text-white">{{ error || 'Connecting to live stream...' }}</p>
             </div>
           </div>
 
