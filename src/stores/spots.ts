@@ -230,29 +230,25 @@ export const useSpotStore = defineStore('spots', () => {
     updates: Partial<VideoFeed>
   ) => {
     try {
-      const spot = spots.value.find(s => s.id === spotId);
-      if (!spot) throw new Error('Spot not found');
-
-      const feedIndex = spot.videoFeeds.findIndex(f => f.id === feedId);
-      if (feedIndex === -1) throw new Error('Feed not found');
-
-      const updatedFeed = {
-        ...spot.videoFeeds[feedIndex],
-        ...updates
-      };
-
-      const updatedFeeds = [...spot.videoFeeds];
-      updatedFeeds[feedIndex] = updatedFeed;
-
-      const spotRef = doc(db, 'spots', spotId);
-      await updateDoc(spotRef, {
-        videoFeeds: updatedFeeds,
+      const feedRef = doc(db, 'spots', spotId, 'videoFeeds', feedId);
+      await updateDoc(feedRef, {
+        ...updates,
         updatedAt: serverTimestamp()
       });
-
-      spot.videoFeeds = updatedFeeds;
+      
+      // Update local state
+      const spotIndex = spots.value.findIndex(s => s.id === spotId);
+      if (spotIndex !== -1) {
+        const feedIndex = spots.value[spotIndex].videoFeeds.findIndex(f => f.id === feedId);
+        if (feedIndex !== -1) {
+          spots.value[spotIndex].videoFeeds[feedIndex] = {
+            ...spots.value[spotIndex].videoFeeds[feedIndex],
+            ...updates
+          };
+        }
+      }
+      
       return true;
-
     } catch (err: any) {
       console.error('Error updating video feed:', err);
       error.value = err.message || 'Failed to update video feed';

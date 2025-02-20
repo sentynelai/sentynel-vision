@@ -8,6 +8,7 @@ import { WebRTCService } from '../services/webrtc';
 import CameraStatusIndicator from '../components/CameraStatusIndicator.vue';
 import { VideoProcessingService } from '../services/videoProcessing';
 import { XMarkIcon, ArrowLeftIcon, VideoCameraIcon, PlayIcon, SparklesIcon } from '@heroicons/vue/24/outline';
+import '@mux/mux-player';
 
 const stats = {
   alerts: []
@@ -444,13 +445,22 @@ const handleBack = () => {
       <div class="pt-16">
         <!-- Video Player -->
         <div class="aspect-video bg-gray-900 relative overflow-hidden">
-          <MuxPlayer
-            v-if="feed.muxPlaybackId"
-            :playback-id="feed.muxPlaybackId"
-            type="live"
-            :auto-play="true"
-            :muted="true"
-          />
+          <template v-if="feed?.muxPlaybackId">
+            <mux-player
+              :playback-id="feed.muxPlaybackId"
+              stream-type="live"
+              autoplay
+              muted
+              class="w-full h-full"
+              primary-color="#00ff00"
+              :style="{
+                '--media-object-fit': 'contain',
+                '--media-object-position': 'center',
+                'height': '100%',
+                'width': '100%'
+              }"
+            ></mux-player>
+          </template>
 
           <!-- Loading State -->
           <div
@@ -459,44 +469,20 @@ const handleBack = () => {
           >
             <div class="text-center">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-green mx-auto mb-4"></div>
-              <p class="text-white">{{ loadingChunks ? 'Syncing with camera...' : 'Initializing video feed...' }}</p>
+              <p class="text-white">Connecting to live stream...</p>
             </div>
           </div>
 
-          <!-- Play Button State -->
-          <div
-            v-else-if="showPlayButton && !loadingChunks"
-            class="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          >
-            <div class="text-center">
-              <button
-                @click="handlePlayClick"
-                class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green hover:bg-neon-green/90 transition-colors"
-              >
-                <PlayIcon class="h-8 w-8 text-black" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Loading Chunks State -->
-          <div
-            v-else-if="loadingChunks"
-            class="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          >
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-green mx-auto mb-4"></div>
-              <p class="text-white">Loading video chunks...</p>
-            </div>
-          </div>
-          
           <!-- Offline State -->
           <div
-            v-if="!loading && !isInitializing && feed.status === 'inactive'"
+            v-if="!loading && !isInitializing && (!feed?.muxPlaybackId || feed.status === 'inactive')"
             class="absolute inset-0 flex items-center justify-center bg-gray-800"
           >
             <div class="text-center">
               <VideoCameraIcon class="h-12 w-12 text-gray-600 mx-auto mb-4" />
-              <p class="text-gray-400">Camera is currently offline</p>
+              <p class="text-gray-400">
+                {{ !feed?.muxPlaybackId ? 'No stream available' : 'Camera is currently offline' }}
+              </p>
             </div>
           </div>
 
@@ -560,3 +546,13 @@ const handleBack = () => {
     </div>
   </div>
 </template>
+
+<style>
+/* Add these styles to handle the Mux player appearance */
+mux-player {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  --controls: none;
+}
+</style>

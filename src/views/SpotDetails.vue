@@ -294,9 +294,10 @@ const getSeverityColor = (severity: string) => {
                 <button 
                   @click="router.push(`/spots/${spot.id}/camera/${feed.id}`)"
                   class="flex items-center justify-center px-4 py-2 bg-neon-green hover:bg-neon-green/90 text-black rounded-lg transition-colors"
+                  :disabled="!feed.muxPlaybackId"
                 >
                   <VideoCameraIcon class="h-4 w-4 mr-2" />
-                  <span class="text-sm">View Video</span>
+                  <span class="text-sm">{{ feed.muxPlaybackId ? 'View Video' : 'No Stream' }}</span>
                 </button>
                 <button 
                   @click="handleShareFeed(feed)"

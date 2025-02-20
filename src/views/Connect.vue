@@ -137,8 +137,9 @@ const startCamera = async () => {
     if (spot.value && feed.value) {
       connectionSteps.value[2].status = 'loading';
       await spotStore.updateVideoFeed(spot.value.id, feed.value.id, {
-        muxStreamId: streamKey.value,
-        muxPlaybackId: playbackId.value
+        muxStreamId: streamId.value,
+        muxPlaybackId: playbackId.value,
+        status: 'active'
       });
     }
 
