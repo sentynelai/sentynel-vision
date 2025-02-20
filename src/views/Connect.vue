@@ -49,6 +49,12 @@ const connectionSteps = ref([
   { id: 'recording', label: 'Recording Setup', status: 'pending' }
 ]);
 
+const rtmpUrl = computed(() => 'rtmp://global-live.mux.com/app');
+const streamingInfo = computed(() => ({
+  rtmpUrl: rtmpUrl.value,
+  streamKey: streamKey.value
+}));
+
 const handleCameraError = async (err: any) => {
   console.error('Camera error:', err.name, err.message);
   
@@ -133,22 +139,26 @@ const startCamera = async () => {
     streamKey.value = newStreamKey;
     playbackId.value = newPlaybackId;
 
-    // Update feed with Mux stream info and set status to active immediately
+    // Update feed with Mux stream info
     if (spot.value && feed.value) {
       connectionSteps.value[2].status = 'loading';
       await spotStore.updateVideoFeed(spot.value.id, feed.value.id, {
         muxStreamId: streamId.value,
         muxPlaybackId: playbackId.value,
-        status: 'active'
+        status: 'active',
+        rtmpUrl: rtmpUrl.value,  // Save RTMP URL
+        streamKey: streamKey.value  // Save stream key
       });
-
-      // Start monitoring upload progress immediately
-      startUploadMonitoring();
     }
 
-    // Mark steps as complete
+    // Show success message with streaming info
+    error.value = null;
     connectionSteps.value.forEach(step => step.status = 'complete');
 
+    // Add a helpful message
+    alert(`Stream created successfully!\n\nTo start streaming, configure your streaming software with:\nRTMP URL: ${rtmpUrl.value}\nStream Key: ${streamKey.value}`);
+
+    // Mark steps as complete
     connectionSteps.value[0].status = 'complete';
     connectionSteps.value[1].status = 'loading';
 
@@ -392,6 +402,20 @@ onBeforeUnmount(() => {
             analysisStatus === 'idle' ? `Last analysis: ${lastEvent}` :
             'Analysis error'
           }}</span>
+        </div>
+
+        <!-- RTMP URL and Stream Key -->
+        <div v-if="streamKey" class="inline-flex items-center space-x-2 px-3 py-2 text-sm text-white bg-black/40 backdrop-blur-sm rounded-full border border-neon-green/20">
+          <div class="flex flex-col space-y-1">
+            <div class="flex items-center">
+              <span class="text-gray-400 mr-2">RTMP URL:</span>
+              <span class="text-neon-green">{{ rtmpUrl }}</span>
+            </div>
+            <div class="flex items-center">
+              <span class="text-gray-400 mr-2">Stream Key:</span>
+              <span class="text-neon-green">{{ streamKey }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
