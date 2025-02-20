@@ -40,15 +40,9 @@ export const handler: Handler = async (event, context) => {
         },
         reduced_latency: true,
         test: false,
+        status: 'active',
         passthrough: `${spotId}:${feedId}`
       });
-
-      // Immediately enable the stream
-      try {
-        await Video.liveStreams.enable(response.id);
-      } catch (enableError) {
-        console.error('Error enabling stream:', enableError);
-      }
 
       return {
         statusCode: 200,
@@ -58,18 +52,6 @@ export const handler: Handler = async (event, context) => {
           streamKey: response.stream_key,
           playbackId: response.playback_ids?.[0]?.id || ''
         })
-      };
-    }
-
-    // Enable stream
-    if (event.httpMethod === 'POST' && pathParts[0] && pathParts[1] === 'enable') {
-      const streamId = pathParts[0];
-      await Video.liveStreams.enable(streamId);
-      
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ success: true })
       };
     }
 
@@ -86,7 +68,7 @@ export const handler: Handler = async (event, context) => {
           statusCode: 200,
           headers,
           body: JSON.stringify({
-            status: stream.status === 'active' ? 'active' : 'idle',
+            status: stream.status,
             playbackId: stream.playback_ids?.[0]?.id || ''
           })
         };
