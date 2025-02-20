@@ -8,8 +8,10 @@ import { WebRTCService } from '../services/webrtc';
 import CameraStatusIndicator from '../components/CameraStatusIndicator.vue';
 import { VideoProcessingService } from '../services/videoProcessing';
 import { XMarkIcon, ArrowLeftIcon, VideoCameraIcon, PlayIcon, SparklesIcon } from '@heroicons/vue/24/outline';
-import '@mux/mux-player';
 import { MuxService } from '../services/mux';
+
+import('https://cdn.jsdelivr.net/npm/@mux/mux-player@latest/dist/mux-player.min.js')
+  .catch(err => console.error('Error loading Mux Player:', err));
 
 const stats = {
   alerts: []
@@ -477,17 +479,16 @@ const handleBack = () => {
         <div class="aspect-video bg-gray-900 relative overflow-hidden">
           <template v-if="feed?.muxPlaybackId && isStreamReady">
             <mux-player
+              :env-key="''"
               :playback-id="feed.muxPlaybackId"
               stream-type="live"
-              autoplay
-              muted
-              class="w-full h-full"
-              primary-color="#00ff00"
+              :metadata="{ 
+                video_title: feed.name,
+                player_name: 'Sentynel Vision Player'
+              }"
               :style="{
-                '--media-object-fit': 'contain',
-                '--media-object-position': 'center',
-                'height': '100%',
-                'width': '100%'
+                height: '100%',
+                width: '100%'
               }"
             ></mux-player>
           </template>
@@ -578,11 +579,12 @@ const handleBack = () => {
 </template>
 
 <style>
-/* Add these styles to handle the Mux player appearance */
 mux-player {
   aspect-ratio: 16 / 9;
   width: 100%;
   height: 100%;
   --controls: none;
+  --media-object-fit: contain;
+  --media-object-position: center;
 }
 </style>
