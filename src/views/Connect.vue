@@ -189,6 +189,9 @@ const startUploadMonitoring = () => {
   const updateProgress = async () => {
     if (streamId.value) {
       try {
+        // Try to enable the stream on each check
+        await MuxService.enableLiveStream(streamId.value);
+        
         const status = await MuxService.getLiveStreamStatus(streamId.value);
         if (status.status === 'active' || status.status === 'idle') {
           uploadProgress.value = 100;

@@ -33,8 +33,6 @@ export const handler: Handler = async (event, context) => {
     if (event.httpMethod === 'POST' && !pathParts.length) {
       const { spotId, feedId } = JSON.parse(event.body || '{}');
 
-      console.log(Object.keys(Video.liveStreams));
-
       const response = await Video.liveStreams.create({
         playback_policy: ['public'],
         new_asset_settings: {
@@ -45,6 +43,13 @@ export const handler: Handler = async (event, context) => {
         passthrough: `${spotId}:${feedId}`
       });
 
+      // Immediately enable the stream
+      try {
+        await Video.liveStreams.enable(response.id);
+      } catch (enableError) {
+        console.error('Error enabling stream:', enableError);
+      }
+
       return {
         statusCode: 200,
         headers,
@@ -53,6 +58,18 @@ export const handler: Handler = async (event, context) => {
           streamKey: response.stream_key,
           playbackId: response.playback_ids?.[0]?.id || ''
         })
+      };
+    }
+
+    // Enable stream
+    if (event.httpMethod === 'POST' && pathParts[0] && pathParts[1] === 'enable') {
+      const streamId = pathParts[0];
+      await Video.liveStreams.enable(streamId);
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ success: true })
       };
     }
 
@@ -120,7 +137,7 @@ export const handler: Handler = async (event, context) => {
     console.error('Mux API error:', error);
     
     return {
-      statusCode: 500,
+      statusCode: error.status || 500,
       headers,
       body: JSON.stringify({ error: error.message })
     };

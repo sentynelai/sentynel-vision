@@ -13,6 +13,7 @@ export interface MuxAsset {
 
 export class MuxService {
   static async createLiveStream(spotId: string, feedId: string): Promise<{
+    streamId: string;
     streamKey: string;
     playbackId: string;
   }> {
@@ -29,9 +30,33 @@ export class MuxService {
         throw new Error('Failed to create live stream');
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      // Try to enable the stream immediately after creation
+      try {
+        await this.enableLiveStream(data.streamId);
+      } catch (enableError) {
+        console.warn('Initial stream enable failed:', enableError);
+      }
+
+      return data;
     } catch (error) {
       console.error('Error creating Mux live stream:', error);
+      throw error;
+    }
+  }
+
+  static async enableLiveStream(streamId: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_URL}/${streamId}/enable`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to enable stream');
+      }
+    } catch (error) {
+      console.error('Error enabling Mux live stream:', error);
       throw error;
     }
   }
