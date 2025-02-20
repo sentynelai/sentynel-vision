@@ -306,16 +306,22 @@ const checkStreamStatus = async () => {
   
   try {
     const status = await MuxService.getLiveStreamStatus(feed.value.muxStreamId);
-    isStreamReady.value = status.status === 'active' || status.status === 'idle';
+    console.log('Stream status:', status); // Add logging to debug
+    
+    // Only set stream as ready if it's actually active
+    isStreamReady.value = status.status === 'active';
     
     if (!isStreamReady.value) {
-      error.value = 'Waiting for stream to start...';
+      error.value = status.status === 'idle' 
+        ? 'Waiting for camera to start streaming...' 
+        : 'Stream not available';
     } else {
       error.value = null;
     }
   } catch (err) {
     console.error('Error checking stream status:', err);
     error.value = 'Stream not available';
+    isStreamReady.value = false;
   }
 };
 
@@ -501,6 +507,9 @@ const handleBack = () => {
             <div class="text-center">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-green mx-auto mb-4"></div>
               <p class="text-white">{{ error || 'Connecting to live stream...' }}</p>
+              <p v-if="error" class="text-sm text-gray-400 mt-2">
+                Make sure the camera is actively streaming
+              </p>
             </div>
           </div>
 
