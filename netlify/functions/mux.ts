@@ -36,13 +36,17 @@ export const handler: Handler = async (event, context) => {
       const response = await Video.liveStreams.create({
         playback_policy: ['public'],
         new_asset_settings: {
-          playback_policy: ['public']
+          playback_policy: ['public'],
+          mp4_support: 'standard'
         },
         reduced_latency: true,
         test: false,
-        status: 'active',
+        reconnect_window: 60,
         passthrough: `${spotId}:${feedId}`
       });
+
+      // Log the response for debugging
+      console.log('Created live stream:', response);
 
       return {
         statusCode: 200,
@@ -63,13 +67,15 @@ export const handler: Handler = async (event, context) => {
 
       try {
         const stream = await Video.liveStreams.retrieve(streamId);
+        console.log('Stream status:', stream.status, 'Active asset:', stream.active_asset_id);
         
         return {
           statusCode: 200,
           headers,
           body: JSON.stringify({
             status: stream.status,
-            playbackId: stream.playback_ids?.[0]?.id || ''
+            playbackId: stream.playback_ids?.[0]?.id || '',
+            activeAssetId: stream.active_asset_id
           })
         };
       } catch (error) {
