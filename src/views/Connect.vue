@@ -133,7 +133,7 @@ const startCamera = async () => {
     streamKey.value = newStreamKey;
     playbackId.value = newPlaybackId;
 
-    // Update feed with Mux stream info
+    // Update feed with Mux stream info and set status to active immediately
     if (spot.value && feed.value) {
       connectionSteps.value[2].status = 'loading';
       await spotStore.updateVideoFeed(spot.value.id, feed.value.id, {
@@ -141,6 +141,9 @@ const startCamera = async () => {
         muxPlaybackId: playbackId.value,
         status: 'active'
       });
+
+      // Start monitoring upload progress immediately
+      startUploadMonitoring();
     }
 
     // Mark steps as complete
@@ -168,9 +171,6 @@ const startCamera = async () => {
     isRecording.value = true;
     uploadStatus.value = 'uploading';
 
-    // Start monitoring upload progress
-    startUploadMonitoring();
-    
     // Start analysis monitoring
     startAnalysisMonitoring();
 
@@ -190,9 +190,16 @@ const startUploadMonitoring = () => {
     if (streamId.value) {
       try {
         const status = await MuxService.getLiveStreamStatus(streamId.value);
-        if (status.status === 'active') {
+        if (status.status === 'active' || status.status === 'idle') {
           uploadProgress.value = 100;
           uploadStatus.value = 'uploading';
+          
+          // Ensure feed status stays active
+          if (spot.value && feed.value) {
+            await spotStore.updateVideoFeed(spot.value.id, feed.value.id, {
+              status: 'active'
+            });
+          }
         } else {
           uploadProgress.value = 0;
           uploadStatus.value = 'idle';
@@ -204,10 +211,10 @@ const startUploadMonitoring = () => {
     }
   };
 
-  // Update progress every second
-  const progressInterval = setInterval(updateProgress, 1000);
+  // Update more frequently initially
+  updateProgress();
+  const progressInterval = setInterval(updateProgress, 2000);
 
-  // Cleanup on unmount
   onBeforeUnmount(() => {
     clearInterval(progressInterval);
   });

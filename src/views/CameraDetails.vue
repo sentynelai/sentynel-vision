@@ -308,13 +308,11 @@ const checkStreamStatus = async () => {
     const status = await MuxService.getLiveStreamStatus(feed.value.muxStreamId);
     console.log('Stream status:', status); // Add logging to debug
     
-    // Only set stream as ready if it's actually active
-    isStreamReady.value = status.status === 'active';
+    // Consider both active and idle states as ready
+    isStreamReady.value = status.status === 'active' || status.status === 'idle';
     
     if (!isStreamReady.value) {
-      error.value = status.status === 'idle' 
-        ? 'Waiting for camera to start streaming...' 
-        : 'Stream not available';
+      error.value = 'Stream not available';
     } else {
       error.value = null;
     }
@@ -334,9 +332,9 @@ onMounted(async () => {
     } else if (!feed.value) {
       error.value = 'Camera not found';
     } else {
-      // Start checking stream status
+      // Start checking stream status more frequently
       await checkStreamStatus();
-      streamCheckInterval.value = window.setInterval(checkStreamStatus, 5000);
+      streamCheckInterval.value = window.setInterval(checkStreamStatus, 2000);
     }
     isInitializing.value = false;
     // Start loading chunks when hasStartedLoading becomes true
